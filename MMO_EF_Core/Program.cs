@@ -1,30 +1,42 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MMO_EF_Core
 {
     class Program
     {
-        //초기화 시간이 걸림
-        static void InitializeDB(bool forceReset = false)
-        {
-            using (AppDbContext db = new AppDbContext())
-            {
-                if (forceReset && !(db.GetService<IDatabaseCreator>() as RelationalDatabaseCreator).Exists()) return;
-
-                db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
-
-                Console.WriteLine("DB Initialized");
-            }
-
-        }
+        
     
         static void Main(string[] args)
         {
-            InitializeDB(forceReset: true);
+            
+
+            //CRUD (Create, Read, Update, Delete)
+            Console.WriteLine("명령어 입력");
+            Console.WriteLine("[0] Force Reset");
+            Console.WriteLine("[1] ReadAll");
+            Console.WriteLine("[2] UpdateDate");
+            Console.WriteLine("[3] DeleteItem");
+
+            while (true) {
+                Console.Write("> ");
+                string command = Console.ReadLine();
+                switch (command) {
+                    case "0":
+                        DbCommands.InitializeDB(forceReset: true);
+                        break;
+                    case "1":
+                        DbCommands.ReadAll();
+                        break;
+                    case "2":
+                        DbCommands.UpdateDate();
+                        break;
+                    case "3":
+                        DbCommands.DeleteItem();
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ namespace MMO_EF_Core
     //4) 모델링 class에서 참조하는 다른 class가 있으면, 그것도 분석한다.
     //5) OnModelCreating 함수 호출(추가 설정 override)
     //6) 데이터베이스의 전체 모델링 구조를 내부 메모리에 들고 있음
-    class AppDbContext : DbContext
+    public class AppDbContext : DbContext
     {
         //Item이라는 DB 테이블이 있는데, 세부적인 칼럼/키 정보는 Items 클래스를 참고
         public DbSet<Item> Items { get; set; }
