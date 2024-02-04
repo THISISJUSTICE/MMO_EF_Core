@@ -18,6 +18,7 @@ namespace MMO_EF_Core
     {
         //Item이라는 DB 테이블이 있는데, 세부적인 칼럼/키 정보는 Items 클래스를 참고
         public DbSet<Item> Items { get; set; }
+        public DbSet<Player> Players { get; set; }
         //어떤 DB를 어떻게 연결하는 등의 각종 설정
         public const string ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=EFCoreDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
