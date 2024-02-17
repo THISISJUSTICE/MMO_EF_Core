@@ -121,14 +121,10 @@ namespace MMO_EF_Core
             {
                 var info = db.Guilds.
                     Where(g => g.GuildName == name)
-                    .Select(g => new
-                    {
-                        Name = g.GuildName,
-                        MemeberCount = g.Members.Count
-                    })
+                    .MapGuildToDto()
                     .First();
 
-                Console.WriteLine($"GuildName({info.Name}) MemeberCount({info.MemeberCount})");
+                Console.WriteLine($"GuildName({info.Name}) MemeberCount({info.MemberCount})");
             }
         }
 
