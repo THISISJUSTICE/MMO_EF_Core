@@ -19,16 +19,24 @@ namespace MMO_EF_Core
         public DateTime CreateDate { get; set; }
 
         //다른 클래스를 참조(FK) (Navigational Property)
+        [ForeignKey("OwnerID")]
         public Player Owner { get; set; } //데이터 베이스에서는 없는 참조 값
     }
 
-    //클래스 이름 => 테이블 이름
+    [Table("Player")]
     public class Player { 
         public int PlayerID { get; set; } // => PK
         public string Name { get; set; }
 
-        //list보다 속도가 빠름
-        public ICollection<Item> Items { get; set; } 
+        public Item Item { get; set; } 
+        public Guild Guild { get; set; }
+    }
+
+    [Table("Guild")]
+    public class Guild { 
+        public int GuildID { get; set; }
+        public string GuildName { get; set; }
+        public ICollection<Player> Members { get; set; }
     }
 
 }
