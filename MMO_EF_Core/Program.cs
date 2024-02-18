@@ -13,7 +13,9 @@ namespace MMO_EF_Core
             //CRUD (Create, Read, Update, Delete)
             Console.WriteLine("명령어 입력");
             Console.WriteLine("[0] Force Reset");
-            Console.WriteLine("[1] Update Test");
+            Console.WriteLine("[1] Update (Reload)");
+            Console.WriteLine("[2] Update (Full)");
+            
 
             while (true) {
                 Console.Write("> ");
@@ -23,10 +25,10 @@ namespace MMO_EF_Core
                         DbCommands.InitializeDB(forceReset: true);
                         break;
                     case "1":
-                        DbCommands.UpdateTest();
+                        DbCommands.UpdateByReload();
                         break;
                     case "2":
-                        
+                        DbCommands.UpdateByFull();
                         break;
                     case "3":
                         

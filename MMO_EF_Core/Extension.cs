@@ -13,6 +13,7 @@ namespace MMO_EF_Core
         public static IQueryable<GuildDto> MapGuildToDto(this IQueryable<Guild> guild) {
             return guild.Select(g => new GuildDto()
             {
+                GuildID = g.GuildID,
                 Name = g.GuildName,
                 MemberCount = g.Members.Count
             });
