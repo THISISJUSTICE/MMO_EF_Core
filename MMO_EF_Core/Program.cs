@@ -25,13 +25,13 @@ namespace MMO_EF_Core
                         DbCommands.InitializeDB(forceReset: true);
                         break;
                     case "1":
-                        DbCommands.EagerLoading();
+                        
                         break;
                     case "2":
-                        DbCommands.ExplicitLoading();
+                        
                         break;
                     case "3":
-                        DbCommands.SelectLoading();
+                        
                         break;
                     default:
                         break;
