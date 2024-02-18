@@ -13,9 +13,7 @@ namespace MMO_EF_Core
             //CRUD (Create, Read, Update, Delete)
             Console.WriteLine("명령어 입력");
             Console.WriteLine("[0] Force Reset");
-            Console.WriteLine("[1] Eager Loading"); //즉시 로딩
-            Console.WriteLine("[2] Explicit Loading"); // 명시적
-            Console.WriteLine("[3] Select Loading"); // 선택
+            Console.WriteLine("[1] Update Test");
 
             while (true) {
                 Console.Write("> ");
@@ -25,7 +23,7 @@ namespace MMO_EF_Core
                         DbCommands.InitializeDB(forceReset: true);
                         break;
                     case "1":
-                        
+                        DbCommands.UpdateTest();
                         break;
                     case "2":
                         
