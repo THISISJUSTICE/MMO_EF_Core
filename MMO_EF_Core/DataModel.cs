@@ -19,7 +19,8 @@ namespace MMO_EF_Core
         public DateTime CreateDate { get; set; }
 
         //다른 클래스를 참조(FK) (Navigational Property)
-        [ForeignKey("OwnerID")]
+        //public int OwnerID { get; set; }
+        public int? OwnerID { get; set; }
         public Player Owner { get; set; } //데이터 베이스에서는 없는 참조 값
     }
 

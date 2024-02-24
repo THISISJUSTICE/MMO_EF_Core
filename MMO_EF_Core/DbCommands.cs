@@ -67,68 +67,49 @@ namespace MMO_EF_Core
             db.SaveChanges();
         }
 
-        // Update 3단계
-        // 1) Tracked Entity를 얻어온다
-        // 2) Entity 클래스의 property를 변경(set)
-        // 3) SaveChanges 호출
+        // - Principal Entity (주요 테이블)
+        // - Dependent Entity (의존적 테이블(FK를 포함하는 테이블))
 
-        // (Connected VS Disconnected) Update
-        // Disconnected: Update 단계가 한 번에 일어나지 않고 끊기는 경우
-        // (REST API 등)
-        // 처리법
-        // 1) Reload 방식
-        // 2) Full Update 방식: 모든 정보를 다 송수신하여 Entity를 다시 만들고 Update
+        // 0) Dependent 데이터가 Principal 데이터 없이 존재 가능 여부
+        // -> 가능하지 않은 정책(1), 가능한 정책(2)
 
-        public static void ShowGuilds() {
+        // Nullable ! int?
+        // FK int => (1), FK Nullable => (2)
+
+        public static void ShowItems() {
             using (AppDbContext db = new AppDbContext()) {
-                foreach (var guild in db.Guilds.MapGuildToDto()) {
-                    Console.WriteLine($"GuildID({guild.GuildID}) GuildName({guild.Name}) MemberCount({guild.MemberCount})");
+                foreach (var item in db.Items.Include(i => i.Owner).ToList()) {
+                    if (item.Owner == null)
+                    {
+                        Console.WriteLine($"ItemID({item.ItemID}) TemplateID({item.TemplateID}) Owner(0)");
+                    }
+                    else {
+                        Console.WriteLine($"ItemID({item.ItemID}) TemplateID({item.TemplateID}) OwnerID({item.Owner.PlayerID}) Owner({item.Owner.Name})");
+                    }
                 }
             }
         }
 
-        public static void UpdateByReload() {
-            ShowGuilds();
-            
-            Console.WriteLine("Input Guild ID");
+        // - Nullable이 아니라면, Principal 테이블이 삭제되면 Dependent 테이블도 같이 삭제됨
+        // - Nullable이라면, Principal 테이블이 삭제되더라도 Dependent 테이블은 삭제 되지 않음
+        public static void Test() {
+            ShowItems();
+
+            Console.WriteLine("Input Delete PlayerID");
             Console.Write("> ");
             int id = int.Parse(Console.ReadLine());
-            Console.WriteLine("Input Guild Name");
-            Console.Write("> ");
-            string name = Console.ReadLine();
 
             using (AppDbContext db = new AppDbContext()) {
-                Guild guild = db.Find<Guild>(id);
-                guild.GuildName = name;
+                Player player = db.Players.
+                    Include(p => p.Item).Single(p => p.PlayerID == id);
+
+                db.Players.Remove(player);
                 db.SaveChanges();
             }
 
-            Console.WriteLine("--- Update Complete ---");
-            ShowGuilds();
-        }
+            Console.WriteLine("--- Test Complete ---");
 
-        public static string MakeUpdateJsonStr() {
-            var jsonStr = "{\"GuildID\":1, \"GuildName\": \"Hello\", \"Memebers\":null}";
-            return jsonStr;
-        }
-
-        // 장점: DB에 다시 Road할 필요 없이 바로 Update
-        // 단점: 모든 정보 필요, 보안 문제
-        public static void UpdateByFull()
-        {
-            ShowGuilds();
-
-            string jsonStr = MakeUpdateJsonStr();
-            Guild guild = JsonConvert.DeserializeObject<Guild>(jsonStr);
-
-            using (AppDbContext db = new AppDbContext())
-            {
-                db.Guilds.Update(guild);
-                db.SaveChanges();
-            }
-
-            Console.WriteLine("--- Update Complete ---");
-            ShowGuilds();
+            ShowItems();
         }
 
     }
