@@ -69,6 +69,43 @@ namespace MMO_EF_Core
     // 3) 그 외에는 Fluent Api
 
 
+    // 1) Principal Entity
+    // 2) Dependent Entity
+    // 3) Navigational Property
+    // 4) Primary Key (PK)
+    // 5) Foreign Key (FK)
+    // 6) Principal Key = PK or Unique Alternate Key
+    // 7) Required Relationship(Not-Null)
+    // 8) Optional Relationship(Nullable)
+
+    // Convention을 이용한 FK 설정
+    // 1) <PrincipalKeyName>                            PlayerID
+    // 2) <Class><PrincipalKeyName>                     PlayerPlayerID
+    // 3) <NavigationalPropertyName><PrincipalKeyName>  OwnerPlayerID   OwnerID
+
+    // FK와 Nullable
+    // 1) Required Relationship (Not-Null)
+    // 삭제할 때 OnDelete 인자를 Cascade 모드로 호출 -> Principal 삭제하면 Dependent도 삭제
+    // 2) Optional Relationship (Nullable)
+    // 삭제할 때 OnDelete 인자를 ClientSetNull 모드로 호출
+    // -> Principal 삭제할 때 Dependent Tracking 하고 있으면, FK를 null로 세팅
+    // -> Principal 삭제할 때, Dependent Tracking 하고 있지 않으면, Exception 발생
+
+    // Convention의 한계
+    // 1) 복합 FK
+    // 2) 다수의 Navigational Property가 같은 클래스를 참조할 때
+    // 3) DB나 삭제 관련 커스터마이징이 필요할 때
+
+    // Data Anntaion으로 Relationship 설정
+    // [Foreign Key("Prop1")]
+    // [InverseProperty] - 다수의 Navgational Property가 같은 클래스를 참조할 때
+
+    // Fluent Api로 Relationship 설정
+    // .HasOne() .HasMany()
+    // .WithOne() .WithMany()
+    // .HasForeignKey() .IsRequired() .OnDelete()
+    // .HasConstratName() .HasPrincipalKey()
+
     [Table("Item")]
     public class Item { 
         [NotMapped]
@@ -78,10 +115,13 @@ namespace MMO_EF_Core
         public int TemplateID { get; set; }
         public DateTime CreateDate { get; set; }
 
-        //다른 클래스를 참조(FK) (Navigational Property)
-        //public int OwnerID { get; set; }
-        public int? OwnerID { get; set; }
-        public Player Owner { get; set; } //데이터 베이스에서는 없는 참조 값
+        //[ForeignKey("Owner")]
+        public int OwnerID { get; set; }
+        //[InverseProperty("OwnedItem")] //[ForeignKey("OwnerID")]
+        public Player Owner { get; set; }
+        
+        public int? CreatorID { get; set; }
+        public Player Creator { get; set; }
     }
 
     [Table("Player")]
@@ -91,7 +131,10 @@ namespace MMO_EF_Core
         [MaxLength(20)]
         public string Name { get; set; }
 
-        public Item Item { get; set; } 
+        [InverseProperty("Owner")]
+        public Item OwnedItem { get; set; }
+        [InverseProperty("Creator")]
+        public ICollection<Item> CreatedItems { get; set; }
         public Guild Guild { get; set; }
     }
 
@@ -105,6 +148,7 @@ namespace MMO_EF_Core
     // DTO(Data Transfer Object)
     public class GuildDto {
         public int GuildID { get; set; }
+        //Alternate Key
         public string Name { get; set; }
         public int MemberCount { get; set; }
 
