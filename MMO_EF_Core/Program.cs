@@ -24,7 +24,7 @@ namespace MMO_EF_Core
                         DbCommands.InitializeDB(forceReset: true);
                         break;
                     case "1":
-                        DbCommands.TestDelete();
+                        
                         break;
                     case "2":
                         

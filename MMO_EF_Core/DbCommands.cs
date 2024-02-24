@@ -114,26 +114,7 @@ namespace MMO_EF_Core
             }
         }
 
-        // 1) Tracking Entity 할당
-        // 2) Remove 호출
-        // 3) SaveChanges 호출
-        public static void TestDelete() {
-            ShowItems();
-            Console.WriteLine("Select Delete ItemID");
-            Console.Write("> ");
-            int id = int.Parse(Console.ReadLine());
-
-            using (AppDbContext db = new AppDbContext()) {
-                Item item = db.Items.Find(id);
-                //db.Items.Remove(item);
-                item.SoftDeleted = true;
-                db.SaveChanges();
-            }
-
-
-            Console.WriteLine("--- Test Delete Complete ---");
-            ShowItems();
-        }
+        
 
     }
 }

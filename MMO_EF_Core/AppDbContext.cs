@@ -32,6 +32,12 @@ namespace MMO_EF_Core
             builder.Entity<Item>().HasQueryFilter(i => i.SoftDeleted == false); // 삭제된 아이템인지 확인
 
             //필터를 무시하고 싶으면 IgnoreQueryFilters 옵션 추가
+
+
+            builder.Entity<Player>()
+                .HasIndex(p => p.Name)
+                .HasName("Index_Person_Name")
+                .IsUnique();
         }
 
     }
