@@ -67,14 +67,6 @@ namespace MMO_EF_Core
             db.SaveChanges();
         }
 
-        // - Principal Entity (주요 테이블)
-        // - Dependent Entity (의존적 테이블(FK를 포함하는 테이블))
-
-        // 0) Dependent 데이터가 Principal 데이터 없이 존재 가능 여부
-        // -> 가능하지 않은 정책(1), 가능한 정책(2)
-
-        // Nullable ! int?
-        // FK int => (1), FK Nullable => (2)
 
         public static void ShowItems() {
             using (AppDbContext db = new AppDbContext()) {
@@ -90,12 +82,24 @@ namespace MMO_EF_Core
             }
         }
 
-        // - Nullable이 아니라면, Principal 테이블이 삭제되면 Dependent 테이블도 같이 삭제됨
-        // - Nullable이라면, Principal 테이블이 삭제되더라도 Dependent 테이블은 삭제 되지 않음
-        public static void Test() {
+        public static void ShowGuild()
+        {
+            using (AppDbContext db = new AppDbContext())
+            {
+                foreach (var guild in db.Guilds.Include(g => g.Members).ToList())
+                {
+                    
+                    Console.WriteLine($"GuildID({guild.GuildID}) GuildName({guild.GuildName}) MemberCount({guild.Members.Count})");
+                    
+                }
+            }
+        }
+
+        // Update Relationship 1v1
+        public static void Update1v1() {
             ShowItems();
 
-            Console.WriteLine("Input Delete PlayerID");
+            Console.WriteLine("Input ItemSwitch PlayerID");
             Console.Write("> ");
             int id = int.Parse(Console.ReadLine());
 
@@ -103,13 +107,53 @@ namespace MMO_EF_Core
                 Player player = db.Players.
                     Include(p => p.Item).Single(p => p.PlayerID == id);
 
-                db.Players.Remove(player);
+                if (player.Item != null) {
+                    player.Item.TemplateID = 888;
+                    player.Item.CreateDate = DateTime.Now;
+                }
+                /*player.Item = new Item()
+                {
+                    TemplateID = 777,
+                    CreateDate = DateTime.Now
+                };*/
+
                 db.SaveChanges();
             }
 
             Console.WriteLine("--- Test Complete ---");
 
             ShowItems();
+        }
+
+        public static void Update1vM()
+        {
+            ShowGuild();
+
+            Console.WriteLine("Input GuildID");
+            Console.Write("> ");
+            int id = int.Parse(Console.ReadLine());
+
+            using (AppDbContext db = new AppDbContext())
+            {
+                Guild guild = db.Guilds
+                    .Include(g => g.Members)
+                    .Single(g => g.GuildID == id);
+
+                /* guild.Members = new List<Player>() {
+                     new Player() {PlayerID = 2, Name = "Dopa"}
+                 };*/
+
+                guild.Members.Add(new Player()
+                {
+                    Name = "Dopa"
+                });
+
+                db.SaveChanges();
+            }
+
+            Console.WriteLine("--- Test Complete ---");
+
+            ShowGuild();
         }
 
     }
