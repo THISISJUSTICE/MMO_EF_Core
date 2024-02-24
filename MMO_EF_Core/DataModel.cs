@@ -14,6 +14,7 @@ namespace MMO_EF_Core
 
     [Table("Item")]
     public class Item { 
+        public bool SoftDeleted { get; set; }
         public int ItemID { get; set; }
         public int TemplateID { get; set; }
         public DateTime CreateDate { get; set; }
