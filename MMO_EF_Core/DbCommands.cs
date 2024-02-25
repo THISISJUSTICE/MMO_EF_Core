@@ -43,10 +43,11 @@ namespace MMO_EF_Core
                     CreateDate = DateTime.Now,
                     Owner = rookiss
                 },
-                new Item(){
+                new EventItem(){
                     TemplateID = 102,
                     CreateDate = DateTime.Now,
-                    Owner = faker
+                    Owner = faker,
+                    DestroyDate = DateTime.Now
                 },
                 new Item(){
                     TemplateID = 103,
@@ -55,11 +56,13 @@ namespace MMO_EF_Core
                 }
             };
 
-            //Test Shadow Property Value Write
-            db.Entry(items[0]).Property("RecoveredDate").CurrentValue = DateTime.Now;
+            //Test Owned Type
+            items[0].Option = new ItemOption() { Dex = 1, Hp = 2, Str = 3 };
 
-            //Test Backing Field
-            items[0].SetOPtion(new ItemOption() { dex = 1, hp = 2, str = 3 });
+            items[2].Detail = new ItemDetail()
+            {
+                Description = "Hello Item"
+            };
 
             Guild guild = new Guild()
             {
@@ -86,7 +89,7 @@ namespace MMO_EF_Core
                     }
                 }*/
 
-                foreach (var item in db.Items.Include(i => i.Owner).IgnoreQueryFilters().ToList())
+                foreach (var item in db.Items.Include(i => i.Owner).Include(i => i.Detail).IgnoreQueryFilters().ToList())
                 {
                     if (item.SoftDeleted)
                     {
@@ -94,6 +97,23 @@ namespace MMO_EF_Core
                     }
                     else
                     {
+                        if(item.Option != null)
+                        {
+                            Console.WriteLine("STR " + item.Option.Str);
+                        }
+
+                        //Test TPH
+                        //item.Type == ItemType.EventItem
+                        EventItem eventItem = item as EventItem;
+                        if (eventItem != null) {
+                            Console.WriteLine("DestroyDate: " + eventItem.DestroyDate);
+                        }
+
+                        //Test Table Splitting
+                        if (item.Detail != null) {
+                            Console.WriteLine(item.Detail.Description);
+                        }
+
                         if (item.Owner == null)
                         {
                             Console.WriteLine($"ItemID({item.ItemID}) TemplateID({item.TemplateID}) Owner(0)");

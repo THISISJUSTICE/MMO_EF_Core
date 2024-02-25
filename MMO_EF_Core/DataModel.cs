@@ -9,52 +9,50 @@ using Newtonsoft.Json;
 
 namespace MMO_EF_Core
 {
-    //Configuration
+    // Entity Class All Read/Write -> 부담(Select Loading, DTO)
 
-    // A) Convention (관례)
-    // - 각종 형식과 이름 등을 정해진 규칙에 맞게 만들면 EF Core에서 알아서 처리 (변수 이름 형식 등)
-    // - 쉽고 빠르지만, 모든 경우를 처리할 수 없음
-    // B) Data Annotation (데이터 주석)
-    // - class/property 등에 attribute를 붙여 추가 정보 ([Table("")] 등)
-    // C) Fluent Api (직접 정의)
-    // - OnModeCreating에서 직접 설정을 정의
-    // - 활용 범위가 넓음 (DbContext 상속 클래스에 속성 추가)
+    // 1) Owned Type
+    // - 일반 class를 Entity class에 추가
+    // a) 동일한 테이블 추가
+    // - .OwnsOne()
+    // - Relationship이 아닌 Onwership의 개념이기 때문에 .Include()
+    // b) 다른 테이블에 추가
+    // - .OwnsOne().ToTable()
 
-    // Shadow Property
-    // Class에는 있지만, DB에는 없음 -> [NotMapped] .Ignore()
-    // DB에는 있지만 Class에는 없음 -> Shadow Property
-    // 생성 -> .Property<DateTime>("UpdateOn")
-    // Read/Write -> .Property("RecoveredDate").CurrentValue
+    // 2) Table Per Hierachy(TPH)
+    // - 상속 관계의 여러 class <-> 하나의 테이블에 Mapping
+    // a) Convention
+    // - class 상속 -> DbSet 추가
+    // -- Discriminator
+    // b) Fluent Api
+    // - .HasDiscriminator().HasValue()
 
-    // Backing Field (EF Core)
-    // private field DB에 매핑하고, public getter로 가공해서 사용
-    // Fluent Api
+    // 3) Table Splitting
+    // - 다수의 Entity class <-> 하나의 테이블에 Mapping
 
-    public struct ItemOption {
-        public int str;
-        public int dex;
-        public int hp;
+    public enum ItemType { 
+        NormalItem,
+        EventItem
+    }
+
+    public class ItemOption { 
+        public int Str { get; set; }
+        public int Dex { get; set; }
+        public int Hp { get; set; }
+    }
+
+    public class ItemDetail { 
+        public int ItemDetailID { get; set; }
+        public string Description { get; set; }
     }
 
     [Table("Item")]
-    public class Item {
-        private string _jsonData;
-        public string JsonData { 
-            get { return _jsonData; } 
-        }
-
-        public void SetOPtion(ItemOption option) {
-            _jsonData = JsonConvert.SerializeObject(option);
-        }
-
-        
-        public ItemOption GetOption() {
-            return JsonConvert.DeserializeObject<ItemOption>(_jsonData);
-        }
-
-        [NotMapped]
-        public int Test { get; set; }
+    public class Item 
+    {
+        public ItemType Type { get; set; }
         public bool SoftDeleted { get; set; }
+        public ItemOption Option { get; set; }
+        public ItemDetail Detail { get; set; }
         public int ItemID { get; set; }
         public int TemplateID { get; set; }
         public DateTime CreateDate { get; set; }
@@ -63,9 +61,10 @@ namespace MMO_EF_Core
         public int OwnerID { get; set; }
         //[InverseProperty("OwnedItem")] //[ForeignKey("OwnerID")]
         public Player Owner { get; set; }
-        
-        public int? CreatorID { get; set; }
-        public Player Creator { get; set; }
+    }
+
+    public class EventItem : Item { 
+        public DateTime DestroyDate { get; set; }
     }
 
     [Table("Player")]
@@ -77,8 +76,6 @@ namespace MMO_EF_Core
 
         [InverseProperty("Owner")]
         public Item OwnedItem { get; set; }
-        [InverseProperty("Creator")]
-        public ICollection<Item> CreatedItems { get; set; }
         public Guild Guild { get; set; }
     }
 
