@@ -48,6 +48,14 @@ namespace MMO_EF_Core
                 .HasOne(p => p.OwnedItem)
                 .WithOne(i => i.Owner) //상대쪽
                 .HasForeignKey<Item>(i => i.OwnerID);
+
+            //Shadow Property
+            builder.Entity<Item>().Property<DateTime>("RecoveredDate");
+
+            //Backing Field
+            builder.Entity<Item>()
+                .Property(i => i.JsonData)
+                .HasField("_jsonData");
         }
 
     }

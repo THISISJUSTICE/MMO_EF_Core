@@ -55,6 +55,12 @@ namespace MMO_EF_Core
                 }
             };
 
+            //Test Shadow Property Value Write
+            db.Entry(items[0]).Property("RecoveredDate").CurrentValue = DateTime.Now;
+
+            //Test Backing Field
+            items[0].SetOPtion(new ItemOption() { dex = 1, hp = 2, str = 3 });
+
             Guild guild = new Guild()
             {
                 GuildName = "T1",
