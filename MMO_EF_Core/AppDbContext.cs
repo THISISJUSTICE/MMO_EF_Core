@@ -40,24 +40,10 @@ namespace MMO_EF_Core
                 .HasName("Index_Person_Name")
                 .IsUnique();
 
-            //Owned Type
             builder.Entity<Item>()
-                .OwnsOne(i => i.Option);
-
-            //TPH
-            builder.Entity<Item>()
-                .HasDiscriminator(i => i.Type)
-                .HasValue<Item>(ItemType.NormalItem)
-                .HasValue<EventItem>(ItemType.EventItem);
-
-            //Table Splitting
-            builder.Entity<Item>()
-                .HasOne(i => i.Detail)
-                .WithOne()
-                .HasForeignKey<ItemDetail>(i => i.ItemDetailID);
-
-            builder.Entity<Item>().ToTable("Item");
-            builder.Entity<ItemDetail>().ToTable("Item");
+                .Metadata
+                .FindNavigation("Reviews")
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
         }
 
     }
