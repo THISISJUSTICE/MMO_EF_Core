@@ -40,10 +40,8 @@ namespace MMO_EF_Core
                 .HasName("Index_Person_Name")
                 .IsUnique();
 
-            builder.Entity<Item>()
-                .Metadata
-                .FindNavigation("Reviews")
-                .SetPropertyAccessMode(PropertyAccessMode.Field);
+            //DbFunction
+            builder.HasDbFunction(() => Program.GetAverageReviewScore(0));
         }
 
     }

@@ -9,8 +9,14 @@ using Newtonsoft.Json;
 
 namespace MMO_EF_Core
 {
-    // Backing Field -> private field를 DB에 Mapping
-    // Navigation Property에서도 사용 가능
+    // User Defined Function(UDF)
+    // 직접 만든 SQL을 호출하는 기능
+    // - 연산을 DB쪽에서 담당
+    // - EF Core 쿼리가 비효율적인 경우
+
+    // 1) Configuration
+    // - static 함수를 만들고 EF COre 등록
+    // 2) Database Setup
 
     public class ItemReview { 
         public int ItemReviewID { get; set; }
@@ -28,19 +34,7 @@ namespace MMO_EF_Core
         public int OwnerID { get; set; }
         public Player Owner { get; set; }
 
-        public double? AverageScore { get; set; }
-        private readonly List<ItemReview> _reviews = new List<ItemReview>();
-        public IEnumerable<ItemReview> Reviews { get { return _reviews.ToList(); } }
-
-        public void AddReview(ItemReview review) {
-            _reviews.Add(review);
-            AverageScore = _reviews.Average(r => r.Score);
-        }
-
-        public void RemoveReview(ItemReview review) {
-            _reviews.Remove(review);
-            AverageScore = _reviews.Any() ? _reviews.Average(r => r.Score) : (double?)null;
-        }
+        public ICollection<ItemReview> Reviews { get; set; }
     }
 
 
