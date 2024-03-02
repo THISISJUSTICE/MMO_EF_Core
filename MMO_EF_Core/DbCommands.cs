@@ -23,6 +23,7 @@ namespace MMO_EF_Core
             {
                 if (forceReset && !(db.GetService<IDatabaseCreator>() as RelationalDatabaseCreator).Exists()) return;
 
+                //db.Database.Migrate();
                 db.Database.EnsureDeleted();
                 db.Database.EnsureCreated();
 
@@ -48,7 +49,7 @@ namespace MMO_EF_Core
 
         
         public static void CreateTestData(AppDbContext db) {
-            var rookiss = new Player() {  };
+            var rookiss = new Player() { Name = "Rookiss" };
             var faker = new Player() { Name = "Faker" };
             var deft = new Player() { Name = "Deft" };
 

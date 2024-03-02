@@ -40,17 +40,6 @@ namespace MMO_EF_Core
                 .HasName("Index_Person_Name")
                 .IsUnique();
 
-            /*builder.Entity<Item>()
-                .Property("CreateDate")
-                .HasDefaultValue(new DateTime(2020, 1, 1));*/
-
-            builder.Entity<Item>()
-               .Property("CreateDate")
-               .HasDefaultValueSql("GETDATE()");
-
-            builder.Entity<Player>()
-                .Property(p => p.Name)
-                .HasValueGenerator((p, e) => new PlayerNameGenerator());
         }
 
     }
