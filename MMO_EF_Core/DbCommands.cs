@@ -48,40 +48,23 @@ namespace MMO_EF_Core
 
         
         public static void CreateTestData(AppDbContext db) {
-            var rookiss = new Player() { Name = "Rookiss" };
+            var rookiss = new Player() {  };
             var faker = new Player() { Name = "Faker" };
             var deft = new Player() { Name = "Deft" };
 
             var items = new List<Item>() {
                 new Item(){
                     TemplateID = 101,
-                    CreateDate = DateTime.Now,
                     Owner = rookiss
                 },
                 new Item(){
                     TemplateID = 102,
-                    CreateDate = DateTime.Now,
                     Owner = faker,
                 },
                 new Item(){
                     TemplateID = 103,
-                    CreateDate = DateTime.Now,
                     Owner = deft
                 }
-            };
-
-            items[0].Reviews = new List<ItemReview>()
-            {
-                new ItemReview(){Score = 5 },
-                new ItemReview(){Score = 3 },
-                new ItemReview(){Score = 2 }
-            };
-
-            items[1].Reviews = new List<ItemReview>()
-            {
-                new ItemReview(){Score = 1 },
-                new ItemReview(){Score = 1 },
-                new ItemReview(){Score = 0 }
             };
 
             Guild guild = new Guild()
@@ -133,14 +116,6 @@ namespace MMO_EF_Core
             }
         }
 
-        public static void CalAverage() {
-            using (AppDbContext db = new AppDbContext()) {
-                foreach (double? average in db.Items.Select(i => Program.GetAverageReviewScore(i.ItemID))){
-                    if (average == null) Console.WriteLine("No Review");
-                    else Console.WriteLine($"Average : {average.Value}");
-                }
-            }
-        }
 
     }
 }

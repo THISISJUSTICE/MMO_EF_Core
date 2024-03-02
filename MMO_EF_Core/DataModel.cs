@@ -5,23 +5,27 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Newtonsoft.Json;
 
 namespace MMO_EF_Core
 {
-    // User Defined Function(UDF)
-    // 직접 만든 SQL을 호출하는 기능
-    // - 연산을 DB쪽에서 담당
-    // - EF Core 쿼리가 비효율적인 경우
+    // 초기값(Default Value)
 
-    // 1) Configuration
-    // - static 함수를 만들고 EF COre 등록
-    // 2) Database Setup
+    // 기본값 설정 방법
+    // 1) Auto-Property Initializer (C# 6.0)
+    // - Entity 차원이ㅡ 초기값 -> SaveChanges로 적용
+    // 2) Fluent Api
+    // - DB Table DEFAULT를 적용 (고정값 적용)
+    // 3) SQL Fragment (새로운 값이 추가되는 시점에 DB에서 실행되는 코드)
+    // - .HasDefaultValueSql
+    // 4) Value Generator (EF Core에서 실행)
+    // - 일종의 Generator 규칙
 
-    public class ItemReview { 
-        public int ItemReviewID { get; set; }
-        public int Score { get; set; } // 0~5점
-    }
+    // 1) Entity Class 자체의 초기값인지
+    // 2) DB Table 차원에서 초기값인지
+    // - EF <-> DB외에 다른 경로로 DB를 사용하면 차이가 날 수 있음
 
     [Table("Item")]
     public class Item 
@@ -29,14 +33,22 @@ namespace MMO_EF_Core
         public bool SoftDeleted { get; set; }
         public int ItemID { get; set; }
         public int TemplateID { get; set; }
-        public DateTime CreateDate { get; set; }
+        public DateTime CreateDate { get; private set; }
 
         public int OwnerID { get; set; }
         public Player Owner { get; set; }
-
-        public ICollection<ItemReview> Reviews { get; set; }
     }
 
+    public class PlayerNameGenerator : ValueGenerator<string>
+    {
+        public override bool GeneratesTemporaryValues => false;
+
+        public override string Next(EntityEntry entry)
+        {
+            string name = $"Player_{DateTime.Now.ToString("yyyyMMdd")}";
+            return name;
+        }
+    }
 
 
     [Table("Player")]
