@@ -120,45 +120,40 @@ namespace MMO_EF_Core
         }
 
 
-        public static void UpdateAttach() {
+        public static void Test() {
             using (AppDbContext db = new AppDbContext())
             {
-                // State 조작
+                // FromSql
                 {
-                    Player p = new Player() { Name = "StateTest" };
-                    db.Entry(p).State = EntityState.Added; // Tracked로 변환
-                    //db.Players.Add(p);
-                    db.SaveChanges();
+                    string name = "Rookiss";
+                    var list = db.Players
+                        .FromSqlRaw("SELECT * FROM dbo.Player WHERE Name = {0}", name)
+                        .Include(p => p.OwnedItem)
+                        .ToList();
+
+                    foreach (var p in list) {
+                        Console.WriteLine($"{p.Name} {p.PlayerID}");
+                    }
+
+                    // String Interplation C#6.0
+                    var list2 = db.Players
+                        .FromSqlInterpolated($"SELECT * FROM dbo.Player WHERE Name = {name}")
+                        .ToList();
+
+                    foreach (var p in list2) {
+                        Console.WriteLine($"{p.Name} {p.PlayerID}");
+                    }
                 }
 
-                // Track Graph
+                // ExcuteSqlCommand (Non_Query SQL)
                 {
-                    // Disconnedted 상태에서 모든 정보가 아닌 플레이어 이름만 갱신
-                    Player p = new Player()
-                    {
-                        PlayerID = 2,
-                        Name = "Faker_New"
-                    };
+                    Player p = db.Players.Single(p => p.Name == "Faker");
 
-                    p.OwnedItem = new Item() { TemplateID = 777 };
-                    p.Guild = new Guild() { GuildName = "TrackGraphGuild" };
+                    string prevName = "Faker";
+                    string afterName = "Faker_New";
+                    db.Database.ExecuteSqlInterpolated($"Update dbo.Player SET Name={afterName} WHERE Name = {prevName}");
 
-                    db.ChangeTracker.TrackGraph(p, e =>
-                    {
-                        if (e.Entry.Entity is Player)
-                        {
-                            e.Entry.State = EntityState.Unchanged;
-                            e.Entry.Property("Name").IsModified = true;
-                        }
-                        else if (e.Entry.Entity is Guild)
-                        {
-                            e.Entry.State = EntityState.Unchanged;
-                        }
-                        else if (e.Entry.Entity is Item) {
-                            e.Entry.State = EntityState.Unchanged;
-                        }
-                    });
-                    db.SaveChanges();
+                    db.Entry(p).Reload();
                 }
             }
         }

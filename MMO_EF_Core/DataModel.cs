@@ -6,19 +6,20 @@ using Newtonsoft.Json;
 
 namespace MMO_EF_Core
 {
-    // State 조작
+    // SQL 직접 호출
+    // ex) LINQ로 처리할 수 없는 것 -> Stored Procedure 호출
+    // ex) 성능 최적화
 
-    // ex) Entry().State = EntityState.Added
-    // ex) Entity().Property("").IsModified = true
+    // 1) FromSql -> FromSqlRaw / FromSqlInterpolated
+    // - EF Core 쿼리에 Raw SQL 추가
 
-    // - Track Graph
-    // Relationship이 있는 Untracked Entity의 State 조작
+    // 2) ExcuteSqlCommand -> ExecuteSqlRaw / ExecuteSqlInterplated
+    // - Non-Query (SELECT가 아님) SQL
 
-    // - Change Tracker
-    // 상태 정보의 변화를 감지할 때 유용
-    // ex) Player의 Name이 바뀔 때 로그
-    // - 1) SaveChanges를 override
-    // - 2) ChangeTracker.Entries를 이용해서 정보 추출 및 사용
+    // 3) Reload
+    // - 1) Tracked Entity가 이미 있는 상태
+    // - 2) ExcuteSqlCommand에 의해 DB 정보가 변경됐을 시
+    // - 최신 상태로 맞춤
 
     [Table("Item")]
     public class Item 
