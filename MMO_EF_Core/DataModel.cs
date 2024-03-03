@@ -37,7 +37,13 @@ namespace MMO_EF_Core
     // 마지막 Migration 삭제 (Remove-Migration)
 
     // 2) Database-First
+    // - EF Core Power Tools (Download)
+    // - 설계된 데이터베이스를 바탕으로 DbContext 스크립트를 자동으로 생성
+
     // 3) SQL-First
+    // -- 직접 설계
+    // -- Script-Migration [From] [To] [Options]
+    // -- DB끼리의 비교를 이용해서 SQL 추출
 
     [Table("Item")]
     public class Item 
