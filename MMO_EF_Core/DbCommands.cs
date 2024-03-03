@@ -29,6 +29,22 @@ namespace MMO_EF_Core
         // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> 필요에 따라 Unchanged / Modified / Deleted
         // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
 
+        // - 3) Update/UpdateRange
+        // -- Tracking Entity 호출 -> Property 수정 -> SaveChanges
+        // -- Untracked Entity 전체 업데이트 (Disconnected State)
+
+        // EF Core Update
+        // 1) Update 호출
+        // 2) Entity State = Modified로 변경
+        // 3) 모든 Non-Relational Property의 IsModified = true로 변경
+        // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> 필요에 따라 Unchanged / Modified / Deleted
+        // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
+
+        // - 4) Attach
+        // -- UnTracked Entity를 Tracked Entity로 변경
+        // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> Unchanged
+        // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
+
         public static void InitializeDB(bool forceReset = false)
         {
             using (AppDbContext db = new AppDbContext())
@@ -70,14 +86,14 @@ namespace MMO_EF_Core
                     TemplateID = 101,
                     Owner = rookiss
                 },
-                new Item(){
+                /*new Item(){
                     TemplateID = 102,
                     Owner = faker,
                 },
                 new Item(){
                     TemplateID = 103,
                     Owner = deft
-                }
+                }*/
             };
 
             Guild guild = new Guild()
@@ -163,6 +179,41 @@ namespace MMO_EF_Core
             }
         }
 
+
+        public static void UpdateAttach() {
+            using (AppDbContext db = new AppDbContext())
+            {
+                // Update Test
+                {
+                    Player p = new Player();
+                    p.PlayerID = 2;
+                    p.Name = "FakerSenpai";
+                    // DB 키 없음, Non-trakced
+                    p.Guild = new Guild() { GuildName = "Update Guild" };
+                    Console.WriteLine("6) " + db.Entry(p.Guild).State); // Detached
+                    db.Players.Update(p);
+                    Console.WriteLine("7) " + db.Entry(p.Guild).State); // Added
+                }
+
+                // Attach Test
+                {
+                    Player p = new Player();
+
+                    // temp
+                    p.PlayerID = 3;
+                    /*p.Name = "Drift";*/
+
+                    p.Guild = new Guild() { GuildName = "Attach Guild" };
+
+                    Console.WriteLine("8) " + db.Entry(p.Guild).State); // Detached
+                    db.Players.Update(p);
+                    p.Name = "Drift";
+                    Console.WriteLine("9) " + db.Entry(p.Guild).State); // Added
+                }
+
+                db.SaveChanges();
+            }
+        }
 
     }
 }
