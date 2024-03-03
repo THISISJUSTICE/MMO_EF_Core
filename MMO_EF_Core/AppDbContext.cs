@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace MMO_EF_Core
 {
@@ -24,8 +25,12 @@ namespace MMO_EF_Core
         //어떤 DB를 어떻게 연결하는 등의 각종 설정
         public const string ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=EFCoreDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
+        public static readonly ILoggerFactory MyloggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); });
+
         protected override void OnConfiguring(DbContextOptionsBuilder options) {
-            options.UseSqlServer(ConnectionString);
+            options
+                .UseLoggerFactory(MyloggerFactory)
+                .UseSqlServer(ConnectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder builder){
