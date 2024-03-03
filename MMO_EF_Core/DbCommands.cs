@@ -17,34 +17,6 @@ namespace MMO_EF_Core
         // 3) Modified(DB에 있고, 클라이언트에서 수정된 상태, SaveChanges로 DB에 적용)
         // 4) Added(DB에 아직 없음, SaveChanges로 DB에 적용)
 
-        // State 확인 방법
-        // - Entry().State
-        // - Entry().Property().IsModified
-        // - Entry().Navigation().IsModified
-
-        // - 1) Add/AddRange 사용할 때의 상태 변화
-        // -- NotTracking 상태라면 Added
-        // -- Tracking 상태라면, FK 설정이 필요한지에 따라 Modified / 기존 상태 유지
-        // - 2) Remove/RemoveRange 사용할 때의 상태 변화
-        // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> 필요에 따라 Unchanged / Modified / Deleted
-        // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
-
-        // - 3) Update/UpdateRange
-        // -- Tracking Entity 호출 -> Property 수정 -> SaveChanges
-        // -- Untracked Entity 전체 업데이트 (Disconnected State)
-
-        // EF Core Update
-        // 1) Update 호출
-        // 2) Entity State = Modified로 변경
-        // 3) 모든 Non-Relational Property의 IsModified = true로 변경
-        // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> 필요에 따라 Unchanged / Modified / Deleted
-        // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
-
-        // - 4) Attach
-        // -- UnTracked Entity를 Tracked Entity로 변경
-        // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> Unchanged
-        // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
-
         public static void InitializeDB(bool forceReset = false)
         {
             using (AppDbContext db = new AppDbContext())
@@ -108,38 +80,6 @@ namespace MMO_EF_Core
             Console.WriteLine("1) " + db.Entry(rookiss).State);
 
             db.SaveChanges();
-
-            // Add Test
-            {
-                Item item = new Item()
-                {
-                    TemplateID = 500,
-                    Owner = rookiss
-                };
-                db.Items.Add(item);
-                // 아이템 추가 -> 간접적으로 Player도 영향
-                // Player는 Tracking 상태이고, FK 설정은 필요 없음
-                Console.WriteLine("2) " + db.Entry(rookiss).State); //Unchanged
-            }
-
-            // Delete Teast
-            {
-                Player p = db.Players.First();
-                // 아직 DB 키 없음
-                p.Guild = new Guild() { GuildName = "곧 삭제될 길드" };
-
-                // DB 키 있음
-                p.OwnedItem = items[0];
-
-                db.Players.Remove(p);
-
-                Console.WriteLine("3) " + db.Entry(p).State); // Deleted
-                Console.WriteLine("4) " + db.Entry(p.Guild).State); // Added
-                Console.WriteLine("5) " + db.Entry(p.OwnedItem).State); // Deleted (Nullable이 아니기 때문)
-            }
-
-            db.SaveChanges();
-            
         }
 
 
@@ -183,35 +123,43 @@ namespace MMO_EF_Core
         public static void UpdateAttach() {
             using (AppDbContext db = new AppDbContext())
             {
-                // Update Test
+                // State 조작
                 {
-                    Player p = new Player();
-                    p.PlayerID = 2;
-                    p.Name = "FakerSenpai";
-                    // DB 키 없음, Non-trakced
-                    p.Guild = new Guild() { GuildName = "Update Guild" };
-                    Console.WriteLine("6) " + db.Entry(p.Guild).State); // Detached
-                    db.Players.Update(p);
-                    Console.WriteLine("7) " + db.Entry(p.Guild).State); // Added
+                    Player p = new Player() { Name = "StateTest" };
+                    db.Entry(p).State = EntityState.Added; // Tracked로 변환
+                    //db.Players.Add(p);
+                    db.SaveChanges();
                 }
 
-                // Attach Test
+                // Track Graph
                 {
-                    Player p = new Player();
+                    // Disconnedted 상태에서 모든 정보가 아닌 플레이어 이름만 갱신
+                    Player p = new Player()
+                    {
+                        PlayerID = 2,
+                        Name = "Faker_New"
+                    };
 
-                    // temp
-                    p.PlayerID = 3;
-                    /*p.Name = "Drift";*/
+                    p.OwnedItem = new Item() { TemplateID = 777 };
+                    p.Guild = new Guild() { GuildName = "TrackGraphGuild" };
 
-                    p.Guild = new Guild() { GuildName = "Attach Guild" };
-
-                    Console.WriteLine("8) " + db.Entry(p.Guild).State); // Detached
-                    db.Players.Update(p);
-                    p.Name = "Drift";
-                    Console.WriteLine("9) " + db.Entry(p.Guild).State); // Added
+                    db.ChangeTracker.TrackGraph(p, e =>
+                    {
+                        if (e.Entry.Entity is Player)
+                        {
+                            e.Entry.State = EntityState.Unchanged;
+                            e.Entry.Property("Name").IsModified = true;
+                        }
+                        else if (e.Entry.Entity is Guild)
+                        {
+                            e.Entry.State = EntityState.Unchanged;
+                        }
+                        else if (e.Entry.Entity is Item) {
+                            e.Entry.State = EntityState.Unchanged;
+                        }
+                    });
+                    db.SaveChanges();
                 }
-
-                db.SaveChanges();
             }
         }
 

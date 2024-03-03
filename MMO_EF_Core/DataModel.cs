@@ -6,15 +6,19 @@ using Newtonsoft.Json;
 
 namespace MMO_EF_Core
 {
-    // DbContext 심화 (최적화 등)
-    // 1) ChangeTracker
-    // - Tracking State 관련
-    // 2) Database
-    // - Transaction
-    // - DB Creation/Migration
-    // - Raw SQL
-    // 3) Model
-    // - DB 모델링 관련
+    // State 조작
+
+    // ex) Entry().State = EntityState.Added
+    // ex) Entity().Property("").IsModified = true
+
+    // - Track Graph
+    // Relationship이 있는 Untracked Entity의 State 조작
+
+    // - Change Tracker
+    // 상태 정보의 변화를 감지할 때 유용
+    // ex) Player의 Name이 바뀔 때 로그
+    // - 1) SaveChanges를 override
+    // - 2) ChangeTracker.Entries를 이용해서 정보 추출 및 사용
 
     [Table("Item")]
     public class Item 
@@ -30,8 +34,14 @@ namespace MMO_EF_Core
         public Player Owner { get; set; }
     }
 
+    public interface ILogEntity { 
+        DateTime CreateTime { get; }
+        void SetCreateTime();
+    }
+
     [Table("Player")]
-    public class Player { 
+    public class Player : ILogEntity
+    { 
         public int PlayerID { get; set; } // => PK
         [Required]
         [MaxLength(20)]
@@ -40,6 +50,11 @@ namespace MMO_EF_Core
         [InverseProperty("Owner")]
         public Item OwnedItem { get; set; }
         public Guild Guild { get; set; }
+
+        public DateTime CreateTime { get; private set; }
+        public void SetCreateTime() {
+            CreateTime = DateTime.Now;
+        }
     }
 
     [Table("Guild")]
