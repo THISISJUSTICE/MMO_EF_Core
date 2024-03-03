@@ -6,44 +6,15 @@ using Newtonsoft.Json;
 
 namespace MMO_EF_Core
 {
-    // Migration
-
-    // EF Core DbContext <-> DB 상태에 대해 동의가 있어야 함
-
-    // 1) Code-First
-    // - Entity Class / DbContext 기준
-    // - 항상 최신 상태로 DB를 업데이트 하는 것이 아님
-
-    // *** Migration step ***
-    // A) Migration 생성
-    // B) Migration 적용
-
-    // A) Add-Migration [Name]
-    // - 1) DbContext 탐색 후 분석 -> DB 모델링(최신)
-    // - 2) ModleSnapshot.cs를 이용해서 가장 마지막 Migration 상태의 DB 모델링 (가장 마지막 상태)
-    // - 3) 1-2 비교 결과 도출
-    // -- a) ModeSnapshpt -> 최신 DB 모델링
-    // -- b) Migrate Designer.cs와 Migration.cs -> Migration 관련된 세부 정보
-    // 수동으로 Up/Down 추가 및 수정 가능
-
-    // B) Migration 적용
-    // - 1) SQL change script
-    // -- Script-Migration [From] [To] [Options]
-    // - 2) Database.Migrate 호출
-    // - 3) Command Line 방식
-    // - Update_Database [options]
-
-    // 특정 Migration으로 Sync (Update-Database [Name])
-    // 마지막 Migration 삭제 (Remove-Migration)
-
-    // 2) Database-First
-    // - EF Core Power Tools (Download)
-    // - 설계된 데이터베이스를 바탕으로 DbContext 스크립트를 자동으로 생성
-
-    // 3) SQL-First
-    // -- 직접 설계
-    // -- Script-Migration [From] [To] [Options]
-    // -- DB끼리의 비교를 이용해서 SQL 추출
+    // DbContext 심화 (최적화 등)
+    // 1) ChangeTracker
+    // - Tracking State 관련
+    // 2) Database
+    // - Transaction
+    // - DB Creation/Migration
+    // - Raw SQL
+    // 3) Model
+    // - DB 모델링 관련
 
     [Table("Item")]
     public class Item 

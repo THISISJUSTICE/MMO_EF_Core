@@ -10,12 +10,24 @@ namespace MMO_EF_Core
 {
     public class DbCommands
     {
-        //State
+        // State
         // 0) Detached (No Tracking: 추적되지 않는 상태, SaveChange를 해도 알 수 없음)
         // 1) Unchanged (DB에 있고, 수정 사항이 없음, SaveChanges를 해도 업데이트 없음)
         // 2) Deleted (DB에 있고, 삭제되어야 하는 상태, SaveChanges로 DB에 적용)
         // 3) Modified(DB에 있고, 클라이언트에서 수정된 상태, SaveChanges로 DB에 적용)
         // 4) Added(DB에 아직 없음, SaveChanges로 DB에 적용)
+
+        // State 확인 방법
+        // - Entry().State
+        // - Entry().Property().IsModified
+        // - Entry().Navigation().IsModified
+
+        // - 1) Add/AddRange 사용할 때의 상태 변화
+        // -- NotTracking 상태라면 Added
+        // -- Tracking 상태라면, FK 설정이 필요한지에 따라 Modified / 기존 상태 유지
+        // - 2) Remove/RemoveRange 사용할 때의 상태 변화
+        // -- (DB에 의해 생성된 Key) && (C# 기본값 아님) -> 필요에 따라 Unchanged / Modified / Deleted
+        // -- (DB에 의해 생성된 Key 없음) || (C# 기본값) -> Added
 
         public static void InitializeDB(bool forceReset = false)
         {
@@ -77,7 +89,41 @@ namespace MMO_EF_Core
             db.Items.AddRange(items);
             db.Guilds.Add(guild);
 
+            Console.WriteLine("1) " + db.Entry(rookiss).State);
+
             db.SaveChanges();
+
+            // Add Test
+            {
+                Item item = new Item()
+                {
+                    TemplateID = 500,
+                    Owner = rookiss
+                };
+                db.Items.Add(item);
+                // 아이템 추가 -> 간접적으로 Player도 영향
+                // Player는 Tracking 상태이고, FK 설정은 필요 없음
+                Console.WriteLine("2) " + db.Entry(rookiss).State); //Unchanged
+            }
+
+            // Delete Teast
+            {
+                Player p = db.Players.First();
+                // 아직 DB 키 없음
+                p.Guild = new Guild() { GuildName = "곧 삭제될 길드" };
+
+                // DB 키 있음
+                p.OwnedItem = items[0];
+
+                db.Players.Remove(p);
+
+                Console.WriteLine("3) " + db.Entry(p).State); // Deleted
+                Console.WriteLine("4) " + db.Entry(p.Guild).State); // Added
+                Console.WriteLine("5) " + db.Entry(p.OwnedItem).State); // Deleted (Nullable이 아니기 때문)
+            }
+
+            db.SaveChanges();
+            
         }
 
 
